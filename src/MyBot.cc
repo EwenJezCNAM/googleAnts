@@ -1,4 +1,7 @@
 #include "Bot.h"
+#include <iostream>
+#include <vector>
+#include "Location.h"
 
 using namespace std;
 
@@ -19,6 +22,13 @@ int main(int argc, char *argv[])
 
     Bot bot;
     bot.playGame();
+    //Location current = Location(0,0);
+    //vector<Location> vec{ Location(3, 3), Location(1,1), Location(4,4), Location(1, 2)};
+    //vec = bot.sortByDistance(current, vec);
+    //cout << "vec :" << endl;
+    //for (int i = 0; i < vec.size(); i++) {
+    //    cout << "x=" << vec[i].row << " y=" << vec[i].col << endl;
+    //}
 
     return 0;
 }
