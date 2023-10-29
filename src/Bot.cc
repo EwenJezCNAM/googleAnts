@@ -1,4 +1,5 @@
 #include "Bot.h"
+#include "LocationInfo.h"
 #include <map>
 #include <iostream>
 using namespace std;
@@ -87,76 +88,93 @@ void Bot::makeMoves()
         */
 
         // TODO : Use A* search algorithm instead
-        //vector<Location> frontier;
-        //frontier.push_back(state.myAnts[i]);
-        //map<Location, Location> came_from;
-        //map<Location, float> cost_so_far;
-        //came_from[state.myAnts[i]] = state.myAnts[i];
-        //cost_so_far[state.myAnts[i]] = 0;
-        //
-        //while (!frontier.empty()) {
-		//	Location current = frontier.front();
-		//	frontier.erase(frontier.begin());
-        //
-		//	if (current.row == foodInfoPosition.row && current.col == foodInfoPosition.col) {
-		//		break;
-		//	}
-        //
-		//	for (int d = 0; d < TDIRECTIONS; d++) {
-		//		Location next = state.getLocation(current, d);
-		//		if (state.grid[next.row][next.col].isWater) {
-		//			continue;
-		//		}
-		//		float new_cost = cost_so_far[current] + 1;
-		//		if (cost_so_far.find(next) == cost_so_far.end() || new_cost < cost_so_far[next]) {
-		//			cost_so_far[next] = new_cost;
-		//			frontier.push_back(next);
-		//			came_from[next] = current;
-		//		}
-		//	}
-		//}
-        //// Reconstruct the path
-		//Location current = foodInfoPosition;
-		//while (current.row != state.myAnts[i].row || current.col != state.myAnts[i].col) {
-		//	Location next = came_from[current];
-		//	if (next.row == current.row) {
-		//		if (next.col > current.col) {
-		//			state.makeMove(state.myAnts[i], 1);
-		//		}
-		//		else {
-		//			state.makeMove(state.myAnts[i], 3);
-		//		}
-		//	}
-		//	else {
-		//		if (next.row > current.row) {
-		//			state.makeMove(state.myAnts[i], 2);
-		//		}
-		//		else {
-		//			state.makeMove(state.myAnts[i], 0);
-		//		}
-		//	}
-		//	current = next;
-		//}
+        vector<LocationInfo> locationToEvaluate; //the set of node to be evaluated
+        vector<LocationInfo> locationEvaluated; //set of node already evaluated
 
-        vector<Location> tile_to_evaluate; //the set of node to be evaluated
-        vector<Location> tile_evaluated; //set of node already evaluated
 
-        tile_to_evaluate.push_back(state.myAnts[i]);
-        for (int j = 0; j < tile_to_evaluate.size(); j++)
+        LocationInfo currentLocation = LocationInfo(state.myAnts[i], state.myAnts[i], foodInfoPosition); //temporary node for the A*
+        locationToEvaluate.push_back(currentLocation);
+
+        Location start = state.myAnts[i];
+
+        //while the set of node to be evaluated is not empty
+        while (!locationToEvaluate.empty())
         {
-            int gCost = 0;
-            //Location current = sortByDistance(state.myAnts[i], tile_to_evaluate); //Get the smallest
+            locationToEvaluate = sort(locationToEvaluate);
+
+            currentLocation = locationToEvaluate[0];
+            if (currentLocation.col == foodInfoPosition.col && currentLocation.row == foodInfoPosition.row)
+			{
+				// We found the shortest path to the food
+                state.bug <<"We found the shortest path to the food" << endl;
+				break;
+			}
+
+            state.bug << "LocationToEvaluate : " << locationToEvaluate.size() << endl;
+            state.bug << "LocationEvaluated : " << locationEvaluated.size() << endl;
+
+            //Get the possible neighbors of current position
+            vector<LocationInfo> neighbors = vector<LocationInfo>();
+            for (int d = 0; d < TDIRECTIONS; d++)
+		    {
+			    LocationInfo loc = LocationInfo(state.getLocation(currentLocation, d), start, foodInfoPosition);
+                // check if the location is not in the set of node already evaluated
+			    if (!state.grid[loc.row][loc.col].isWater && !checkInVector(locationEvaluated, loc))
+			    {
+				    neighbors.push_back(loc);
+			    }
+		    }
+
+            //Set the neighbors to the location to evaluate list
+            for (LocationInfo neighbor : neighbors)
+            {
+                neighbor.setComeFrom(currentLocation);
+			    locationToEvaluate.push_back(neighbor);
+
+		    }
+
+            //remove the current location from the set of node to be evaluated
+            locationToEvaluate.erase(locationToEvaluate.begin());
+            //add the current location to the set of node already evaluated
+            locationEvaluated.push_back(currentLocation);
 
         }
+
+        state.bug << "The while ended up currectly" << endl;
+        
+        LocationInfo previousMove = *currentLocation.comeFrom;
+        LocationInfo nextMove;
+        while (previousMove != start)
+        {
+            nextMove = previousMove;
+            previousMove = *previousMove.comeFrom;
+        }
+
+        state.bug << "Get the next move" << endl;
+        // move the ant to the first step of the shortest path found
+        for (int d = 0; d < TDIRECTIONS; d++)
+        {
+            Location loc = state.getLocation(currentLocation, d);
+            if (loc == nextMove)
+			{
+				state.makeMove(state.myAnts[i], d);
+				break;
+			}
+        }
+
+        state.bug << "The ant have been move" << endl;
+
+
+
         
 
 	}
 
-
+    // ORIGINAL CODE
     //state.bug << "turn " << state.turn << ":" << endl;
     //state.bug << state << endl;
     
-    // ORIGINAL CODE
+    
     //picks out moves for each ant
     //for(int ant=0; ant<(int)state.myAnts.size(); ant++)
     //{
@@ -176,6 +194,15 @@ void Bot::makeMoves()
 };
 
 
+bool Bot::checkInVector(const std::vector<LocationInfo> vec, const LocationInfo elementToFind) {
+    for (LocationInfo element : vec) {
+        if (element.col == elementToFind.col && element.row == elementToFind.row) {
+            return true; // element found in vector, so return false.
+        }
+    }
+    return false; // element not found in vector, so return true.
+}
+
 int Bot::calculateFCost(int gCost, Location n, Location goal) {
     //f(n) = g(n) + h(n)
     //int gCost = 0; // g(n) is the cost of the path from the start node to n
@@ -186,9 +213,9 @@ int Bot::calculateFCost(int gCost, Location n, Location goal) {
 }
 
 // Create a function which sort like the smallest element appears first
-vector<Location> Bot::sortByDistance(Location currentLocation, vector<Location> vec)
+vector<LocationInfo> Bot::sort(vector<LocationInfo> vec)
 {
-    Location temp;
+    LocationInfo temp = LocationInfo();
 
     bool not_sorted = true;
 
@@ -196,12 +223,22 @@ vector<Location> Bot::sortByDistance(Location currentLocation, vector<Location> 
         not_sorted = false;
         for (int j = 1; j < vec.size() - i; j++) {
             
-            // Compare the Manhattan dirstance between two elements from the list
-            if (calculateHeuristic(currentLocation, vec[j - 1]) > calculateHeuristic(currentLocation, vec[j])) {
+            // Sort by fCost
+            if (vec[j - 1].fCost > vec[j].fCost) {
                 temp = vec[j - 1];
                 vec[j-1] = vec[j];
                 vec[j] = temp;
                 not_sorted = true;
+            }
+            else if (vec[j - 1].fCost == vec[j].fCost)
+            {
+                // If fCost are equals, sort by hCost
+                if (vec[j - 1].hCost > vec[j].hCost) {
+					temp = vec[j - 1];
+					vec[j - 1] = vec[j];
+					vec[j] = temp;
+					not_sorted = true;
+				}
             }
         }
     }
@@ -209,7 +246,7 @@ vector<Location> Bot::sortByDistance(Location currentLocation, vector<Location> 
 };
 
 float Bot::calculateHeuristic(const Location a, const Location b) {
-    return abs(a.row - b.row) + abs(a.col - b.col);
+    return abs(a.row - b.row) + abs(a.col - b.col); // Manhattan distance because we can only move in 4 directions
 }
 
 

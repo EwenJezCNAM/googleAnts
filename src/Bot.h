@@ -3,6 +3,7 @@
 
 #include "State.h"
 #include "Location.h"
+#include "LocationInfo.h"
 #include "State.h"
 #include <vector>
 
@@ -21,7 +22,9 @@ struct Bot
 
     int calculateFCost(int, Location, Location); // calculate the f cost of the current state
 
-    std::vector<Location> sortByDistance(Location currentLocation, std::vector<Location> vec);
+    std::vector<LocationInfo> sort(std::vector<LocationInfo>);
+
+    bool checkInVector(const std::vector<LocationInfo>, const LocationInfo);
 
     float calculateHeuristic(const Location a, const Location b); // calculate the Manhattan distance
 
