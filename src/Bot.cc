@@ -62,113 +62,117 @@ void Bot::makeMoves()
 			}
 		}
 
-		// Move the ant to the closest food using no method
-        /*
-        if (minDistance < 999999.0f) {
-			float yDistance = abs(state.myAnts[i].row - foodInfoPosition.row);
-            float xDistance = abs(state.myAnts[i].col - foodInfoPosition.col);
-        
-            if (yDistance > xDistance) {
-				if (state.myAnts[i].row > foodInfoPosition.row) {
-					state.makeMove(state.myAnts[i], 0);
-				}
-				else {
-					state.makeMove(state.myAnts[i], 2);
-				}
-			}
-			else {
-				if (state.myAnts[i].col > foodInfoPosition.col) {
-					state.makeMove(state.myAnts[i], 3);
-				}
-				else {
-					state.makeMove(state.myAnts[i], 1);
-				}
-			}
-		}
-        */
-
-        // TODO : Use A* search algorithm instead
-        vector<LocationInfo> locationToEvaluate; //the set of node to be evaluated
-        vector<LocationInfo> locationEvaluated; //set of node already evaluated
-
-
-        LocationInfo currentLocation = LocationInfo(state.myAnts[i], state.myAnts[i], foodInfoPosition); //temporary node for the A*
-        locationToEvaluate.push_back(currentLocation);
+        // TODO : Use A* search algorithm for every neighbors of the ant.
+        // Then, we move the ant on the neighbor with the shortest path
 
         Location start = state.myAnts[i];
 
-        currentLocation.path.push_back(start);
+        //Get the possible neighbors a the start position
+        map<Location, int> dict = {};
+            
+        vector<Location> startNeighbors = vector<Location>();
 
-        //while the set of node to be evaluated is not empty
-        while (!locationToEvaluate.empty())
+        for (int d = 0; d < TDIRECTIONS; d++)
         {
-            vector<Location> previousPath = currentLocation.path;
-
-
-            // Get the next location to test
-            locationToEvaluate = sort(locationToEvaluate);
-            currentLocation = locationToEvaluate[0];
-            currentLocation.path = previousPath;
-
-            if (currentLocation.col == foodInfoPosition.col && currentLocation.row == foodInfoPosition.row)
-			{
-				// We found the shortest path to the food
-                state.bug <<"We found the shortest path to the food" << endl;
-				break;
-			}
-
-            state.bug << "LocationToEvaluate : " << locationToEvaluate.size() << endl;
-            state.bug << "LocationEvaluated : " << locationEvaluated.size() << endl;
-
-            //Get the possible neighbors of current position
-            vector<LocationInfo> neighbors = vector<LocationInfo>();
-            for (int d = 0; d < TDIRECTIONS; d++)
-		    {
-			    LocationInfo loc = LocationInfo(state.getLocation(currentLocation, d), start, foodInfoPosition);
-                // check if the location is not in the set of node already evaluated
-			    if (!state.grid[loc.row][loc.col].isWater && !checkInVector(locationEvaluated, loc))
-			    {
-				    neighbors.push_back(loc);
-			    }
-		    }
-
-            //Set the neighbors to the location to evaluate list
-            for (LocationInfo neighbor : neighbors)
+            Location loc = state.getLocation(start, d);
+            // check if the location is not in the set of node already evaluated
+            if (!state.grid[loc.row][loc.col].isWater)
             {
-                //neighbor.addPath(currentLocation.path);
-			    locationToEvaluate.push_back(neighbor);
-
-		    }
-
-            //remove the current location from the set of node to be evaluated
-            locationToEvaluate.erase(locationToEvaluate.begin());
-            //add the current location to the set of node already evaluated
-            locationEvaluated.push_back(currentLocation);
-
+                startNeighbors.push_back(loc);
+            }
         }
 
-        state.bug << "The while ended up currectly, now we have to move the ant" << endl;
-        
-        state.bug << "Current location size : " << currentLocation.path.size() << endl;
-        
+        for (Location startNeighbor : startNeighbors)
+        {
+			state.bug << "Start neighbor : x=" << startNeighbor.row << " y=" << startNeighbor.col << endl;        
+            vector<LocationInfo> locationToEvaluate = vector<LocationInfo>();//the set of node to be evaluated
+            vector<LocationInfo> locationEvaluated = vector<LocationInfo>();//set of node already evaluated
 
-        //Location nextMove = currentLocation.path[1];
-        //state.bug << "Next move : x=" << currentLocation.path[1].row << " y=" << currentLocation.path[1].col << endl;
-        //
-        //
-        //state.bug << "Get the next move" << endl;
-        //// move the ant to the first step of the shortest path found
-        //for (int d = 0; d < TDIRECTIONS; d++)
-        //{
-        //    Location loc = state.getLocation(currentLocation, d);
-        //    if (loc == nextMove)
-		//	{
-		//		state.makeMove(state.myAnts[i], d);
-		//		break;
-		//	}
-        //}
-        //
-        //state.bug << "The ant have been move" << endl;
+            int pathLenght = 0;
+
+
+            LocationInfo currentLocation = LocationInfo(startNeighbor, startNeighbor, foodInfoPosition); //temporary node for the A*
+            locationToEvaluate.push_back(currentLocation);
+
+
+            //while the set of node to be evaluated is not empty
+            while (!locationToEvaluate.empty())
+            {
+                // Get the next location to test
+                locationToEvaluate = sort(locationToEvaluate);
+                currentLocation = locationToEvaluate[0];
+
+                if (currentLocation.col == foodInfoPosition.col && currentLocation.row == foodInfoPosition.row)
+			    {
+
+                    dict[startNeighbor] = pathLenght;
+				    // We found the shortest path to the food
+                    state.bug <<"We found the shortest path to the food" << endl;
+				    break;
+			    }
+
+                pathLenght++;
+
+                state.bug << "LocationToEvaluate : " << locationToEvaluate.size() << endl;
+                state.bug << "LocationEvaluated : " << locationEvaluated.size() << endl;
+
+                //Get the possible neighbors of current position
+                vector<LocationInfo> neighbors = vector<LocationInfo>();
+                for (int d = 0; d < TDIRECTIONS; d++)
+		        {
+			        LocationInfo loc = LocationInfo(state.getLocation(currentLocation, d), start, foodInfoPosition);
+                    // check if the location is not in the set of node already evaluated
+			        if (!state.grid[loc.row][loc.col].isWater && !checkInVector(locationEvaluated, loc))
+			        {
+				        neighbors.push_back(loc);
+			        }
+		        }
+
+                //Set the neighbors to the location to evaluate list
+                for (LocationInfo neighbor : neighbors)
+                {
+                    //neighbor.addPath(currentLocation.path);
+			        locationToEvaluate.push_back(neighbor);
+
+		        }
+
+                //remove the current location from the set of node to be evaluated
+                locationToEvaluate.erase(locationToEvaluate.begin());
+                //add the current location to the set of node already evaluated
+                locationEvaluated.push_back(currentLocation);
+            }
+        }
+
+
+        state.bug << "The while ended up currectly, now we have to move the ant" << endl;
+
+        //Get the shortest start neighbor according their path lenght
+        int minPathLenght = 999999;
+        Location nextMove = Location();
+        for (auto const& x : dict)
+{
+			if (x.second < minPathLenght)
+			{
+				minPathLenght = x.second;
+				nextMove = x.first;
+			}
+		}
+
+        state.bug << "the ne" << endl;
+        state.bug << "The ant will move to : x=" << nextMove.row << " y=" << nextMove.col << endl;
+
+        // move the ant to the first step of the shortest path found
+        for (int d = 0; d < TDIRECTIONS; d++)
+        {
+            Location loc = state.getLocation(nextMove, d);
+            if (!state.grid[loc.row][loc.col].isWater)
+			{
+				state.makeMove(state.myAnts[i], d);
+				break;
+			}
+        }
+        
+        state.bug << "The ant have been move" << endl;
 
 
 

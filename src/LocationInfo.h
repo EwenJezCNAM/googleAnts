@@ -14,7 +14,6 @@ struct LocationInfo : public Location
 	Location start;
 	Location target;
 	Location current;
-	vector<Location> path;
 
 	LocationInfo(Location currentLocation, Location startLocation, Location targetLocation)
 	{
@@ -51,9 +50,6 @@ struct LocationInfo : public Location
 		return abs(a.row - b.row) + abs(a.col - b.col); // Manhattan distance because we can only move in 4 directions
 	};
 
-	void addPath(vector<Location> _path) {
-		path.insert(path.end(), _path.begin(), _path.end());
-	};
 
 };
 
