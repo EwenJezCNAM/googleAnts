@@ -97,12 +97,19 @@ void Bot::makeMoves()
 
         Location start = state.myAnts[i];
 
+        currentLocation.path.push_back(start);
+
         //while the set of node to be evaluated is not empty
         while (!locationToEvaluate.empty())
         {
-            locationToEvaluate = sort(locationToEvaluate);
+            vector<Location> previousPath = currentLocation.path;
 
+
+            // Get the next location to test
+            locationToEvaluate = sort(locationToEvaluate);
             currentLocation = locationToEvaluate[0];
+            currentLocation.path = previousPath;
+
             if (currentLocation.col == foodInfoPosition.col && currentLocation.row == foodInfoPosition.row)
 			{
 				// We found the shortest path to the food
@@ -128,7 +135,7 @@ void Bot::makeMoves()
             //Set the neighbors to the location to evaluate list
             for (LocationInfo neighbor : neighbors)
             {
-                neighbor.setComeFrom(currentLocation);
+                //neighbor.addPath(currentLocation.path);
 			    locationToEvaluate.push_back(neighbor);
 
 		    }
@@ -140,29 +147,28 @@ void Bot::makeMoves()
 
         }
 
-        state.bug << "The while ended up currectly" << endl;
+        state.bug << "The while ended up currectly, now we have to move the ant" << endl;
         
-        LocationInfo previousMove = *currentLocation.comeFrom;
-        LocationInfo nextMove;
-        while (previousMove != start)
-        {
-            nextMove = previousMove;
-            previousMove = *previousMove.comeFrom;
-        }
+        state.bug << "Current location size : " << currentLocation.path.size() << endl;
+        
 
-        state.bug << "Get the next move" << endl;
-        // move the ant to the first step of the shortest path found
-        for (int d = 0; d < TDIRECTIONS; d++)
-        {
-            Location loc = state.getLocation(currentLocation, d);
-            if (loc == nextMove)
-			{
-				state.makeMove(state.myAnts[i], d);
-				break;
-			}
-        }
-
-        state.bug << "The ant have been move" << endl;
+        //Location nextMove = currentLocation.path[1];
+        //state.bug << "Next move : x=" << currentLocation.path[1].row << " y=" << currentLocation.path[1].col << endl;
+        //
+        //
+        //state.bug << "Get the next move" << endl;
+        //// move the ant to the first step of the shortest path found
+        //for (int d = 0; d < TDIRECTIONS; d++)
+        //{
+        //    Location loc = state.getLocation(currentLocation, d);
+        //    if (loc == nextMove)
+		//	{
+		//		state.makeMove(state.myAnts[i], d);
+		//		break;
+		//	}
+        //}
+        //
+        //state.bug << "The ant have been move" << endl;
 
 
 
