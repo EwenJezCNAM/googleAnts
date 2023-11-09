@@ -24,6 +24,10 @@ struct LocationInfo : public Location
 		setHCost();
 		setGCost(gCost);
 		calculateFCost();
+
+		//Set row and col
+		row = currentLocation.row;
+		col = currentLocation.col;
 	};
 
 	LocationInfo()
