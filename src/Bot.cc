@@ -43,7 +43,7 @@ void Bot::makeMoves()
         state.bug << "Food position : x=" << state.food[i].row << " y=" << state.food[i].col << endl;
     }
     
-    //NEW CODE
+
     //Get the closest food to each ants
     for (int i = 0; i < state.myAnts.size(); i++)
 	{
@@ -65,10 +65,13 @@ void Bot::makeMoves()
 
         state.bug << "closest food position : x=" << foodInfoPosition.row << " y=" << foodInfoPosition.col << endl;
 
+
+
         // TODO : Use A* search algorithm for every neighbors of the ant.
         // Then, we move the ant on the neighbor with the shortest path
 
         Location start = state.myAnts[i];
+        Location target = foodInfoPosition;
 
         //Get the possible neighbors a the start position
         vector<NeighborInfo> neighborInfoList = vector<NeighborInfo>();
@@ -93,12 +96,12 @@ void Bot::makeMoves()
             vector<LocationInfo> locationToEvaluate = vector<LocationInfo>();//the set of node to be evaluated
             vector<LocationInfo> locationEvaluated = vector<LocationInfo>();//set of node already evaluated
 
-            locationEvaluated.push_back(LocationInfo(start, start, foodInfoPosition));
+            locationEvaluated.push_back(LocationInfo(start, start, target));
 
             int pathLenght = 0;
 
 
-            LocationInfo currentLocation = LocationInfo(startNeighbor, startNeighbor, foodInfoPosition); //temporary node for the A*
+            LocationInfo currentLocation = LocationInfo(startNeighbor, startNeighbor, target); //temporary node for the A*
             locationToEvaluate.push_back(currentLocation);
 
 
@@ -109,7 +112,7 @@ void Bot::makeMoves()
                 locationToEvaluate = sort(locationToEvaluate);
                 currentLocation = locationToEvaluate[0];
 
-                if (currentLocation.col == foodInfoPosition.col && currentLocation.row == foodInfoPosition.row)
+                if (currentLocation.col == target.col && currentLocation.row == target.row)
 			    {
                     neighborInfoList.push_back(NeighborInfo(startNeighbor, pathLenght));
 				    // We found the shortest path to the food
@@ -132,7 +135,7 @@ void Bot::makeMoves()
                 vector<LocationInfo> neighbors = vector<LocationInfo>();
                 for (int d = 0; d < TDIRECTIONS; d++)
 		        {
-			        LocationInfo loc = LocationInfo(state.getLocation(currentLocation, d), start, foodInfoPosition);
+			        LocationInfo loc = LocationInfo(state.getLocation(currentLocation, d), start, target);
                     // check if the location is not in the set of node already evaluated
 			        if (!state.grid[loc.row][loc.col].isWater && !checkInVector(locationEvaluated, loc))
 			        {
@@ -205,25 +208,8 @@ void Bot::makeMoves()
 
 	}
 
-    // ORIGINAL CODE
     //state.bug << "turn " << state.turn << ":" << endl;
     //state.bug << state << endl;
-    
-    
-    //picks out moves for each ant
-    //for(int ant=0; ant<(int)state.myAnts.size(); ant++)
-    //{
-    //    for(int d=0; d<TDIRECTIONS; d++)
-    //    {
-    //        Location loc = state.getLocation(state.myAnts[ant], d);
-    //
-    //        if(!state.grid[loc.row][loc.col].isWater)
-    //        {
-    //            state.makeMove(state.myAnts[ant], d);
-    //            break;
-    //        }
-    //    }
-    //}
 
     //state.bug << "time taken: " << state.timer.getTime() << "ms" << endl << endl;
 };
@@ -244,14 +230,6 @@ bool Bot::checkInVector(const std::vector<LocationInfo> vec, const LocationInfo 
     return false; // element not found in vector, so return true.
 }
 
-int Bot::calculateFCost(int gCost, Location n, Location goal) {
-    //f(n) = g(n) + h(n)
-    //int gCost = 0; // g(n) is the cost of the path from the start node to n
-    int hCost = calculateHeuristic(n, goal); // h(n) is the heuristique fonction which estimates the cost of the cheapest path from n to the goal
-
-    int fCost = gCost + hCost;
-    return fCost;
-}
 
 // Create a function which sort like the smallest element appears first
 vector<LocationInfo> Bot::sort(vector<LocationInfo> vec)
@@ -285,10 +263,6 @@ vector<LocationInfo> Bot::sort(vector<LocationInfo> vec)
     }
     return vec;
 };
-
-float Bot::calculateHeuristic(const Location a, const Location b) {
-    return abs(a.row - b.row) + abs(a.col - b.col); // Manhattan distance because we can only move in 4 directions
-}
 
 
 //finishes the turn
