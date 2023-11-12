@@ -125,8 +125,8 @@ void Bot::makeMoves()
                 //add the current location to the set of node already evaluated
                 locationEvaluated.push_back(currentLocation);
 
-                state.bug << "LocationToEvaluate : " << locationToEvaluate.size() << endl;
-                state.bug << "LocationEvaluated : " << locationEvaluated.size() << endl;
+                //state.bug << "LocationToEvaluate : " << locationToEvaluate.size() << endl;
+                //state.bug << "LocationEvaluated : " << locationEvaluated.size() << endl;
 
                 //Get the possible neighbors of current position
                 vector<LocationInfo> neighbors = vector<LocationInfo>();
@@ -160,18 +160,27 @@ void Bot::makeMoves()
 
         bool not_sorted = true;
         NeighborInfo temp = NeighborInfo();
-        for (int n = 0; n < neighborInfoList.size() && not_sorted; n++)
-{
-            not_sorted = false;
-            
+        for (int n = 1; n < neighborInfoList.size(); n++)
+        {
+            state.bug << "toujours dans le boucle" << endl;
+
             // Sort by the calculated distance to the target
-            if (neighborInfoList[n - 1].distanceToTarget > neighborInfoList[n].distanceToTarget) {
+            if (neighborInfoList[n - 1].distanceToTarget > neighborInfoList[n].distanceToTarget)
+            {
+                state.bug << "Passage dans le if" << endl;
                 temp = neighborInfoList[n - 1];
                 neighborInfoList[n - 1] = neighborInfoList[n];
                 neighborInfoList[n] = temp;
+
                 not_sorted = true;
             }
-		}
+            else
+            {
+                not_sorted = false;
+            }
+        }
+
+        state.bug << "The neighborInfoList have been sorted" << endl;
 
         Location nextMove = neighborInfoList[0].neighborLocation;
         
