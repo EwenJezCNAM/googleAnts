@@ -20,13 +20,12 @@ struct Bot
 
     void makeMoves();   //makes moves for a single turn
 
-    int calculateFCost(int, Location, Location); // calculate the f cost of the current state
+    Location getClosestItem(Location ant, vector<Location> items);
 
     std::vector<LocationInfo> sort(std::vector<LocationInfo>);
 
-    bool checkInVector(const std::vector<LocationInfo>, const LocationInfo);
-
-    float calculateHeuristic(const Location a, const Location b); // calculate the Manhattan distance
+    template <typename T>
+    bool checkInVector(const std::vector<T>, const T);
 
     void endTurn();     //indicates to the engine that it has made its moves
     

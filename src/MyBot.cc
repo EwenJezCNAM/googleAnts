@@ -29,6 +29,6 @@ int main(int argc, char *argv[])
     //for (int i = 0; i < vec.size(); i++) {
     //    cout << "x=" << vec[i].row << " y=" << vec[i].col << endl;
     //}
-
+    cout << "end" << endl;
     return 0;
 }
