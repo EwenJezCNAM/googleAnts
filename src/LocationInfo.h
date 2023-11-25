@@ -15,11 +15,17 @@ struct LocationInfo : public Location
 	Location target;
 	Location current;
 
+private:
+	LocationInfo* previousLocation;
+	LocationInfo* nextLocation;
+
+public:
 	LocationInfo(Location currentLocation, Location startLocation, Location targetLocation)
 	{
 		start = startLocation;
 		target = targetLocation;
 		current = currentLocation;
+		//previousLocation = nullptr;
 
 		setHCost();
 		setGCost(gCost);
@@ -28,6 +34,9 @@ struct LocationInfo : public Location
 		//Set row and col
 		row = currentLocation.row;
 		col = currentLocation.col;
+
+		previousLocation = new LocationInfo();
+		nextLocation = new LocationInfo();
 	};
 
 	LocationInfo()
@@ -35,7 +44,17 @@ struct LocationInfo : public Location
 		fCost = 0;
 		hCost = 0;
 		gCost = 0;
+
+		previousLocation = new LocationInfo();
+		nextLocation = new LocationInfo();
 	};
+
+	~LocationInfo()
+	{
+		delete previousLocation;
+		delete nextLocation;
+	}
+
 
 	void calculateFCost() {
 		//f(n) = g(n) + h(n)
@@ -54,6 +73,23 @@ struct LocationInfo : public Location
 		return abs(a.row - b.row) + abs(a.col - b.col); // Manhattan distance because we can only move in 4 directions
 	};
 
+	void setPreviousLocation(LocationInfo& previous)
+	{
+		previousLocation = &previous;
+		previousLocation->nextLocation = this;
+	}
+	
+	LocationInfo* getPreviousLocation()
+	{
+		return previousLocation;
+	}
+
+	LocationInfo* getNextLocation()
+	{
+		return nextLocation;
+	}
+
+	//TODO Desctructor (delete pointer)
 
 };
 
