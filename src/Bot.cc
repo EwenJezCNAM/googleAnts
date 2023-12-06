@@ -1,5 +1,5 @@
 #include "Bot.h"
-#include "LocationInfo.h"
+#include "Node.h"
 #include <map>
 #include <iostream>
 using namespace std;
@@ -59,71 +59,59 @@ void Bot::makeMoves()
         Location start = state.myAnts[i];
         Location target = foodInfoPosition;
 
-        vector<LocationInfo> locationToEvaluate = vector<LocationInfo>();//the set of node to be evaluated
-        vector<LocationInfo> locationEvaluated = vector<LocationInfo>();//set of node already evaluated
+        vector<Node> nodeToEvaluate = vector<Node>();//the set of node to be evaluated
+        vector<Node> nodeEvaluated = vector<Node>();//set of node already evaluated
 
-        int pathLenght = 0;
+        Node currentNode = Node(start, start, target);
 
-        // temporary location for the astar, /!\ it doesn't represent the current location of the ant
-        // but the simulated location of the ant for trough the astar algorithm
-        LocationInfo currentLocation = LocationInfo(start, start, target);
+        nodeToEvaluate.push_back(currentNode);
 
-        //locationEvaluated.push_back(LocationInfo(start, start, target));
-        locationToEvaluate.push_back(currentLocation);
-
-        LocationInfo previousCurrentLocation;
-
+        Node previousNode;
+        
         //while the set of node to be evaluated is not empty
-        while (!locationToEvaluate.empty())
+        while (!nodeToEvaluate.empty())
         {
-            // Get the next location to test (the location with the lowest f cost)
-            locationToEvaluate = sort(locationToEvaluate);
-            currentLocation = locationToEvaluate[0];
+            // Get the next node to test (the node with the lowest f cost)
+            nodeToEvaluate = sort(nodeToEvaluate);
+            currentNode = nodeToEvaluate[0];
 
-            currentLocation.setPreviousLocation(previousCurrentLocation);
-            previousCurrentLocation = currentLocation;
+            state.bug << "test" << endl;
+            currentNode.setPreviousNode(previousNode);
+            previousNode = currentNode;
 
-            //currentLocation.previousLocation = &previousCurrentLocation;
-            //state.bug << "currentLocation.previousLocation->previousLocation : " << currentLocation.previousLocation->previousLocation << endl;
-            //LocationInfo prev = *currentLocation.previousLocation;
-            //state.bug << "*currentLocation.previousLocation->previousLocation : " << prev.row << " " << prev.col << endl;
-            //previousCurrentLocation = currentLocation;
 
-            state.bug << "currentLocation, x=" << currentLocation.row << "y=" << currentLocation.col << endl;
+            state.bug << "currentLocation, x=" << currentNode.row << "y=" << currentNode.col << endl;
 
-            // Check if the simulated location of the ant is on the target
-            if (currentLocation.col == target.col && currentLocation.row == target.row)
+            // Check if the node is the target
+            if (currentNode.col == target.col && currentNode.row == target.row)
 			{
-                // We found the shortest path to the food for one of the start neighbor
+                // We found the shortest path to the food
                 state.bug <<"We found the shortest path to the food" << endl;
 				break;
 			}   
 
-            pathLenght++;
-            state.bug << "pathLenght : " << pathLenght << endl;
-
-            //remove the current location from the set of node to be evaluated
-            locationToEvaluate.erase(locationToEvaluate.begin());
-            //add the current location to the set of node already evaluated
-            locationEvaluated.push_back(currentLocation);
+            //remove the current node from the set of node to be evaluated
+            nodeToEvaluate.erase(nodeToEvaluate.begin());
+            //add the current node to the set of node already evaluated
+            nodeEvaluated.push_back(currentNode);
 
             //state.bug << "LocationToEvaluate : " << locationToEvaluate.size() << endl;
             //state.bug << "LocationEvaluated : " << locationEvaluated.size() << endl;
 
-            //Get the possible neighbors of current location
-            vector<LocationInfo> currentNeighbors = vector<LocationInfo>();
+            //Get the possible neighbors of current node
+            vector<Node> currentNeighbors = vector<Node>();
             for (int d = 0; d < TDIRECTIONS; d++)
 		    {
-			    LocationInfo neighbor = LocationInfo(state.getLocation(currentLocation, d), start, target);
-                // check if the location is not in the set of node already evaluated
-			    if (!state.grid[neighbor.row][neighbor.col].isWater && !checkInVector(locationEvaluated, neighbor))
+                Node neighbor = Node(state.getLocation(currentNode, d), start, target);
+                // check if the node is not in the set of node already evaluated
+			    if (!state.grid[neighbor.row][neighbor.col].isWater && !checkInVector(nodeEvaluated, neighbor))
 			    {
                     currentNeighbors.push_back(neighbor);
 			    }
 		    }
 
-            //Set the neighbors to the location to evaluate list
-            for (LocationInfo neighbor : currentNeighbors) locationToEvaluate.push_back(neighbor);
+            //Set the neighbors to the nodeToEvaluate list
+            for (Node neighbor : currentNeighbors) nodeToEvaluate.push_back(neighbor);
 
 
             state.bug << "Size Neighbors : " << currentNeighbors.size() << endl;
@@ -134,12 +122,12 @@ void Bot::makeMoves()
 
 
         bool beginingFound = false;
-        LocationInfo* begining = currentLocation.getPreviousLocation();
+        Node* begining = currentNode.getPreviousNode();
 
         while (!beginingFound)
         {
-            begining = begining->getPreviousLocation();
-            state.bug << "begining : " << begining->getPreviousLocation()->row << " " << begining->getPreviousLocation()->col << endl;
+            begining = begining->getPreviousNode();
+            state.bug << "begining : " << begining->getPreviousNode()->row << " " << begining->getPreviousNode()->col << endl;
 
             if (!begining)
             {
@@ -148,9 +136,9 @@ void Bot::makeMoves()
             }
         }
         
-        state.bug << "The ant will move to : x=" << begining->getNextLocation()->row << " y=" << begining->getNextLocation()->col << endl;
+        state.bug << "The ant will move to : x=" << begining->getNextNode()->row << " y=" << begining->getNextNode()->col << endl;
 
-        Location nextMove = Location(begining->getNextLocation()->row, begining->getNextLocation()->col);
+        Location nextMove = Location(begining->getNextNode()->row, begining->getNextNode()->col);
 
         // move the ant according the best move found
         for (int d = 0; d < TDIRECTIONS; d++)
@@ -210,9 +198,9 @@ bool Bot::checkInVector(const std::vector<T> vec, const T elementToFind) {
 
 
 // Create a function which sort like the smallest element appears first
-vector<LocationInfo> Bot::sort(vector<LocationInfo> vec)
+vector<Node> Bot::sort(vector<Node> vec)
 {
-    LocationInfo temp = LocationInfo();
+    Node temp = Node();
 
     bool not_sorted = true;
 

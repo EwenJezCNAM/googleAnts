@@ -3,7 +3,7 @@
 
 #include "State.h"
 #include "Location.h"
-#include "LocationInfo.h"
+#include "Node.h"
 #include "State.h"
 #include <vector>
 
@@ -22,7 +22,7 @@ struct Bot
 
     Location getClosestItem(Location ant, vector<Location> items);
 
-    std::vector<LocationInfo> sort(std::vector<LocationInfo>);
+    std::vector<Node> sort(std::vector<Node>);
 
     template <typename T>
     bool checkInVector(const std::vector<T>, const T);
