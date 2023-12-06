@@ -76,9 +76,19 @@ void Bot::makeMoves()
         //while the set of node to be evaluated is not empty
         while (!locationToEvaluate.empty())
         {
+<<<<<<< Updated upstream
             // Get the next location to test (the location with the lowest f cost)
             locationToEvaluate = sort(locationToEvaluate);
             currentLocation = locationToEvaluate[0];
+=======
+            Location loc = state.getLocation(start, d);
+            // check if the location is not in the set of node already evaluated
+            if (!state.grid[loc.row][loc.col].isWater && !checkInVector(state.myAnts, loc) && !checkInVector(state.myFuturAntsLoc, loc))
+            {
+                startNeighbors.push_back(loc);
+            }
+        }
+>>>>>>> Stashed changes
 
             currentLocation.setPreviousLocation(previousCurrentLocation);
             previousCurrentLocation = currentLocation;
@@ -147,6 +157,17 @@ void Bot::makeMoves()
                 break;
             }
         }
+<<<<<<< Updated upstream
+=======
+
+        state.bug << "The neighborInfoList have been sorted" << endl;
+
+
+
+        // Get the first element of the list which is the start neighbor with the shortest path
+        Location nextMove = neighborInfoList[0].neighborLocation;
+        state.myFuturAntsLoc.push_back(nextMove);
+>>>>>>> Stashed changes
         
         state.bug << "The ant will move to : x=" << begining->getNextLocation()->row << " y=" << begining->getNextLocation()->col << endl;
 
@@ -161,14 +182,22 @@ void Bot::makeMoves()
 			    state.makeMove(state.myAnts[i], d);
 			    break;
             }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         }
         
         state.bug << "The ant have been move" << endl;
 	}
 
+<<<<<<< Updated upstream
 
     state.bug << "time taken: " << state.timer.getTime() << "ms" << endl << endl;
+=======
+    state.myFuturAntsLoc.clear();
+    //state.bug << "time taken: " << state.timer.getTime() << "ms" << endl << endl;
+>>>>>>> Stashed changes
 };
 
 
