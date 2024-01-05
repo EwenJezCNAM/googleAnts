@@ -3,12 +3,14 @@
 #include "State.h"
 #include "Location.h"
 #include <iostream>
+#include <stdexcept>
 
 
 
 
 Location Astar::getNextMove(Location start, Location target, State& state)
 {
+    state.bug << "La fonction a commence" << endl;
 
     // Use A* search algorithm for every neighbors of the ant.
     // Then, we move the ant on the neighbor according the shortest path found
@@ -17,10 +19,16 @@ Location Astar::getNextMove(Location start, Location target, State& state)
     vector<Node> nodeEvaluated = vector<Node>();//set of node already evaluated
 
     float hcost = calculateHeuristic(start, target);
+    state.bug << "hcost : " << hcost << endl;
+
     Node currentNode = Node(nullptr, hcost);
+    currentNode.row = start.row;
+    currentNode.col = start.col;
+    state.bug << "current node cree" << endl;
 
     nodeToEvaluate.push_back(currentNode);
 
+    state.bug << "La boucle while commence" << endl;
 
     //while the set of node to be evaluated is not empty
     while (!nodeToEvaluate.empty())
@@ -30,13 +38,13 @@ Location Astar::getNextMove(Location start, Location target, State& state)
         currentNode = nodeToEvaluate[0];
 
 
-        //state.bug << "currentLocation, x=" << currentNode.row << "y=" << currentNode.col << endl;
+        state.bug << "currentLocation, x=" << currentNode.row << "y=" << currentNode.col << endl;
 
         // Check if the node is the target
         if (currentNode.col == target.col && currentNode.row == target.row)
         {
             // We found the shortest path to the food
-            //state.bug << "We found the shortest path to the food" << endl;
+            state.bug << "We found the shortest path to the food" << endl;
             break;
         }
 
@@ -58,7 +66,7 @@ Location Astar::getNextMove(Location start, Location target, State& state)
             neighbor.row = neighborLoc.row;
             neighbor.col = neighborLoc.col;
 
-            // check if the node is not in the set of node already evaluated
+            // check if the node is not in water or not in the set of node already evaluated
             if (!state.grid[neighbor.row][neighbor.col].isWater && !checkInVector(nodeEvaluated, neighbor))
             {
                 currentNeighbors.push_back(neighbor);
@@ -69,11 +77,11 @@ Location Astar::getNextMove(Location start, Location target, State& state)
         for (Node neighbor : currentNeighbors) nodeToEvaluate.push_back(neighbor);
 
 
-        //state.bug << "Size Neighbors : " << currentNeighbors.size() << endl;
+        state.bug << "Size Neighbors : " << currentNeighbors.size() << endl;
     }
 
 
-    //state.bug << "The for ended up currectly, now we have to move the ant" << endl;
+    state.bug << "The for ended up currectly, now we have to move the ant" << endl;
 
 
     bool beginingFound = false;
@@ -82,7 +90,7 @@ Location Astar::getNextMove(Location start, Location target, State& state)
     while (!beginingFound)
     {
         begining = begining->previousNode;
-        //state.bug << "begining : " << begining->getPreviousNode()->row << " " << begining->getPreviousNode()->col << endl;
+        state.bug << "begining : " << begining->previousNode->row << " " << begining->previousNode->col << endl;
 
         if (!begining)
         {
@@ -91,7 +99,7 @@ Location Astar::getNextMove(Location start, Location target, State& state)
         }
     }
 
-    //state.bug << "The ant will move to : x=" << begining->getNextNode()->row << " y=" << begining->getNextNode()->col << endl;
+    state.bug << "The ant will move to : x=" << begining->previousNode->row << " " << begining->previousNode->col << endl;
 
     Location nextMove = Location(begining->row, begining->col);
 

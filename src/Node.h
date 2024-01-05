@@ -13,7 +13,7 @@ struct Node : public Location
 	int fCost; //gCost + hCost
 
 
-private:
+public:
 	Node()
 	{
 		fCost = 0;
@@ -22,13 +22,11 @@ private:
 	};
 
 
-public:
-
 	Node* previousNode;
 
 	Node(Node* _previousNode, int _hCost)
 	{
-
+		this->previousNode = _previousNode;
 		setHCost(_hCost);
 		setGCost();
 		calculateFCost();
@@ -36,7 +34,7 @@ public:
 		//Set row and col (pas besoin finalement car l'on hérite de Location)
 		//row = currentNode.row;
 		//col = currentNode.col;
-		this->previousNode = _previousNode;
+		
 
 	};
 
@@ -50,7 +48,13 @@ public:
 	};
 
 	void setGCost() {
-		gCost = previousNode->gCost + 1;
+		if (previousNode != nullptr) {
+			gCost = previousNode->gCost + 1;
+		}
+		else {
+			gCost = 0;
+		}
+
 	};
 
 };
