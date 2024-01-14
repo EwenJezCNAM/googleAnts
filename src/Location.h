@@ -5,7 +5,7 @@
 */
 struct Location
 {
-    int row, col;
+    int row, col; 
 
     Location()
     {

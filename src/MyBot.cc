@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "Location.h"
+#include "AntLogic.h"
 
 using namespace std;
 

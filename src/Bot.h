@@ -3,8 +3,7 @@
 
 #include "State.h"
 #include "Location.h"
-#include "LocationInfo.h"
-#include "State.h"
+#include "AntLogic.h"
 #include <vector>
 
 /*
@@ -13,6 +12,8 @@
 struct Bot
 {
     State state;
+    
+    vector<AntLogic> KnownAnts;
 
     Bot();
 
@@ -22,7 +23,7 @@ struct Bot
 
     Location getClosestItem(Location ant, vector<Location> items);
 
-    std::vector<LocationInfo> sort(std::vector<LocationInfo>);
+    // std::vector<LocationInfo> sort(std::vector<LocationInfo>);
 
     template <typename T>
     bool checkInVector(const std::vector<T>, const T);

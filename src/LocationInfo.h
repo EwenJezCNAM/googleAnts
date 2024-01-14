@@ -35,8 +35,8 @@ public:
 		row = currentLocation.row;
 		col = currentLocation.col;
 
-		previousLocation = new LocationInfo();
-		nextLocation = new LocationInfo();
+		/*previousLocation = new LocationInfo();
+		nextLocation = new LocationInfo();*/
 	};
 
 	LocationInfo()
@@ -45,15 +45,15 @@ public:
 		hCost = 0;
 		gCost = 0;
 
-		previousLocation = new LocationInfo();
-		nextLocation = new LocationInfo();
+		/*previousLocation = new LocationInfo();
+		nextLocation = new LocationInfo();*/
 	};
 
-	~LocationInfo()
+	/*~LocationInfo()
 	{
 		delete previousLocation;
 		delete nextLocation;
-	}
+	}*/
 
 
 	void calculateFCost() {
@@ -73,8 +73,9 @@ public:
 		return abs(a.row - b.row) + abs(a.col - b.col); // Manhattan distance because we can only move in 4 directions
 	};
 
-	void setPreviousLocation(LocationInfo& previous)
+	void setPreviousLocation(AstarClass previous)
 	{
+		if (previous.getWeight() < previousLocation->getWeight())
 		previousLocation = &previous;
 		previousLocation->nextLocation = this;
 	}
@@ -83,13 +84,11 @@ public:
 	{
 		return previousLocation;
 	}
-
+	
 	LocationInfo* getNextLocation()
 	{
 		return nextLocation;
 	}
-
-	//TODO Desctructor (delete pointer)
 
 };
 
