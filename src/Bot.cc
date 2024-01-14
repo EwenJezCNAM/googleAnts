@@ -30,6 +30,7 @@ void Bot::playGame()
 //makes the bots moves for the turn
 void Bot::makeMoves()
 {
+    NextsAntsLocation.clear();
     //Set the next move for each ant
     for (int i = 0; i < state.myAnts.size(); i++)
     {
@@ -57,9 +58,15 @@ void Bot::makeMoves()
     }
     for (int i = 0; i < KnownAnts.size(); i++) {
         Location closestFood = getClosestItem(KnownAnts[i].AntLocation, state.food);
-        int nextDirection = KnownAnts[i].GetNextMove(closestFood, state);
-        state.makeMove(KnownAnts[i].AntLocation, nextDirection);
-        KnownAnts[i].refreshPosition(nextDirection, state);
+        int nextDirection = KnownAnts[i].GetNextMove(closestFood, state, NextsAntsLocation);
+        if (nextDirection == 4) {
+            NextsAntsLocation.insert(NextsAntsLocation.begin(),KnownAnts[i].AntLocation);
+        }
+        else {
+            state.makeMove(KnownAnts[i].AntLocation, nextDirection);
+            KnownAnts[i].refreshPosition(nextDirection, state);
+            NextsAntsLocation.insert(NextsAntsLocation.begin(), KnownAnts[i].AntLocation);
+        }
     }
  //       // Get the closest food to the ant
 	//	Location foodInfoPosition = getClosestItem(state.myAnts[i], state.food);
