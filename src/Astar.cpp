@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 
-
+int MAX_ITERATION = 100;
 
 Location Astar::getNextMove(Location start, Location target, State& state)
 {
@@ -36,9 +36,16 @@ Location Astar::getNextMove(Location start, Location target, State& state)
         // Get the next node to test (the node with the lowest f cost)
         nodeToEvaluate = sort(nodeToEvaluate);
         currentNode = nodeToEvaluate[0];
+        //for (int i = 0; i < nodeToEvaluate.size(); i++)
+        //{
+        //    state.bug << "fCost [" << i << "] : " << nodeToEvaluate[i].fCost << endl;
+        //}
 
 
-        state.bug << "currentLocation, x=" << currentNode.row << "y=" << currentNode.col << endl;
+        state.bug << "currentNode, x=" << currentNode.row << "y=" << currentNode.col << endl;
+
+
+
 
         // Check if the node is the target
         if (currentNode.col == target.col && currentNode.row == target.row)
@@ -47,6 +54,12 @@ Location Astar::getNextMove(Location start, Location target, State& state)
             state.bug << "We found the shortest path to the food" << endl;
             break;
         }
+        else if (nodeEvaluated.size() > MAX_ITERATION)
+		{
+			// We didn't find the shortest path to the food
+			state.bug << "We didn't find the shortest path to the food" << endl;
+			break;
+		}
 
         //remove the current node from the set of node to be evaluated
         nodeToEvaluate.erase(nodeToEvaluate.begin());
@@ -60,11 +73,12 @@ Location Astar::getNextMove(Location start, Location target, State& state)
         vector<Node> currentNeighbors = vector<Node>();
         for (int d = 0; d < TDIRECTIONS; d++)
         {
-            float neighborHcost = calculateHeuristic(start, target);
-            Node neighbor = Node(&currentNode, neighborHcost);
+            //float neighborHcost = calculateHeuristic(start, target);
+            Node neighbor = Node(&currentNode, 0);
             Location neighborLoc = state.getLocation(currentNode, d);
             neighbor.row = neighborLoc.row;
             neighbor.col = neighborLoc.col;
+            neighbor.hCost = calculateHeuristic(neighbor, target);
 
             // check if the node is not in water or not in the set of node already evaluated
             if (!state.grid[neighbor.row][neighbor.col].isWater && !checkInVector(nodeEvaluated, neighbor))
@@ -83,32 +97,28 @@ Location Astar::getNextMove(Location start, Location target, State& state)
 
     state.bug << "The for ended up currectly, now we have to move the ant" << endl;
 
+    
+    Node* current = &currentNode;
 
-    bool beginingFound = false;
-    Node* begining = currentNode.previousNode;
-
-    while (!beginingFound)
-    {
-        begining = begining->previousNode;
-        state.bug << "begining : " << begining->previousNode->row << " " << begining->previousNode->col << endl;
-
-        if (!begining)
-        {
-            beginingFound = true;
-            break;
-        }
+    // Backtrack from the target node to the start node
+    while (current->previousNode != nullptr && current->previousNode->previousNode != nullptr) {
+        current = current->previousNode;
     }
 
-    state.bug << "The ant will move to : x=" << begining->previousNode->row << " " << begining->previousNode->col << endl;
+    // 'current' is now the node that represents the next move from the start position
+    state.bug << "Next move: x=" << current->row << " y=" << current->col << endl;
 
-    Location nextMove = Location(begining->row, begining->col);
+    Location nextMove = Location(current->row, current->col);
 
-    return nextMove;
+
+    Location nextLocation = Location(current->previousNode->row, current->previousNode->col);
+    return nextLocation;
 }
 
 
 float Astar::calculateHeuristic(const Location a, const Location b) {
     return abs(a.row - b.row) + abs(a.col - b.col); // Manhattan distance because we can only move in 4 directions
+    //return sqrt(pow(a.row - b.row, 2) + pow(a.col - b.col, 2)); // Euclidean distance
 };
 
 

@@ -7,13 +7,13 @@ using namespace std;
 
 struct Node : public Location
 {
-
-	int gCost; //Real distance from start
-	int hCost; //Manhattan distance from end
-	int fCost; //gCost + hCost
-
-
 public:
+	float gCost; //Real distance from start
+	float hCost; //Manhattan distance from end
+	float fCost; //gCost + hCost
+
+
+
 	Node()
 	{
 		fCost = 0;
@@ -24,7 +24,7 @@ public:
 
 	Node* previousNode;
 
-	Node(Node* _previousNode, int _hCost)
+	Node(Node* _previousNode, float _hCost)
 	{
 		this->previousNode = _previousNode;
 		setHCost(_hCost);
@@ -43,7 +43,7 @@ public:
 		fCost = gCost + hCost;
 	};
 
-	void setHCost(int _hcost) {
+	void setHCost(float _hcost) {
 		hCost = _hcost;
 	};
 

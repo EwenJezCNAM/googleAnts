@@ -1,6 +1,7 @@
 #include "Bot.h"
 #include "Node.h"
 #include "Astar.h"
+#include "Timer.h"
 #include <map>
 #include <iostream>
 using namespace std;
@@ -14,6 +15,9 @@ Bot::Bot()
 //plays a single game of Ants.
 void Bot::playGame()
 {
+    //Timer timer;
+    //timer.start();
+
     //reads the game parameters and sets up
     cin >> state;
     state.setup();
@@ -26,6 +30,7 @@ void Bot::playGame()
         makeMoves();
         endTurn();
     }
+
 };
 
 //makes the bots moves for the turn

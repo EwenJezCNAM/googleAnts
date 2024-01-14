@@ -11,7 +11,7 @@ class Astar
 
 public:
     Location getNextMove(Location, Location, State&);
-
+        
 
 
 private:
