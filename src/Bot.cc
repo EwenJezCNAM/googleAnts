@@ -1,5 +1,4 @@
 #include "Bot.h"
-#include "AntLogic.h"
 #include <map>
 #include <iostream>
 using namespace std;
@@ -44,8 +43,23 @@ void Bot::makeMoves()
             KnownAnts.insert(KnownAnts.begin(), AntLogic(state.myAnts[i], getClosestItem(state.myAnts[i], state.food), false));
         }
     }
+    for (int i = 0; i < KnownAnts.size(); i++)
+    {
+        boolean dead = true;
+        for (int j = 0; j < state.myAnts.size(); j++) {
+            if (KnownAnts[i].AntLocation == state.myAnts[j]) {
+                dead = false;
+            }
+        }
+        if (dead) {
+            KnownAnts.erase(KnownAnts.begin() + i);
+        }
+    }
     for (int i = 0; i < KnownAnts.size(); i++) {
-        state.makeMove(KnownAnts[i].AntLocation, KnownAnts[i].GetNextMove(getClosestItem(KnownAnts[i].AntLocation, state.food), state.grid));
+        Location closestFood = getClosestItem(KnownAnts[i].AntLocation, state.food);
+        int nextDirection = KnownAnts[i].GetNextMove(closestFood, state);
+        state.makeMove(KnownAnts[i].AntLocation, nextDirection);
+        KnownAnts[i].refreshPosition(nextDirection, state);
     }
  //       // Get the closest food to the ant
 	//	Location foodInfoPosition = getClosestItem(state.myAnts[i], state.food);
