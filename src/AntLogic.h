@@ -28,20 +28,29 @@ public:
         Warrior = _warriorOn;
     };
 
-    int GetNextMove(Location newObjectivLoc, State& state, vector<Location> NextsAntsLocation) {
-        int d1 = AntLocation.row - Objectif.row;
-        int d2 = AntLocation.col - Objectif.col;
+    int GetNextMove(Location newObjectivLoc, State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+
         checkAndAddPositionToBanList(state);
-        if (Objectif == newObjectivLoc) {
-            int decision = decisionMaking(d1, d2, state, NextsAntsLocation);
-            return decision;
-        }
-        else {
+        if (Objectif != newObjectivLoc) {
             clearAllList();
             Objectif = newObjectivLoc;
-            int decision = decisionMaking(d1, d2, state, NextsAntsLocation);
-            return decision;
         }
+        int d1 = AntLocation.row - Objectif.row;
+        int d2 = AntLocation.col - Objectif.col;
+        if (d1 > 80) {
+            d1 = -1;
+        }
+        if (d2 > 50) {
+            d2 = -1;
+        }
+        if (d1 < -80) {
+            d1 = 1;
+        }
+        if (d2 < -50) {
+            d2 = 1;
+        }
+        int decision = decisionMaking(d1, d2, state, NextsAntsLocation, currentAntsLocation);
+        return decision;
     };
 
     boolean checkIfBanned(vector<int> testedList, int testedInt) {
@@ -55,12 +64,20 @@ public:
         return isBanned;
     };
 
-    boolean checkInList(vector<Location> testedList, Location testedInt) {
+    boolean checkInList(vector<Location> NextMoveList, vector<AntLogic> currentAntsLocation, Location testedInt) {
         boolean isInList = false;
-        for (int i = 0; i < testedList.size(); i++) {
-            if (testedInt == testedList[i]) {
+        for (int i = 0; i < NextMoveList.size(); i++) {
+            if (testedInt == NextMoveList[i]) {
                 isInList = true;
                 break;
+            }
+        }
+        if (!isInList) {
+            for (int i = 0; i < currentAntsLocation.size(); i++) {
+                if (testedInt == currentAntsLocation[i].AntLocation) {
+                    isInList = true;
+                    break;
+                }
             }
         }
         return isInList;
@@ -95,132 +112,143 @@ public:
         bannedRightRow.clear();
     };
 
-    int decisionMaking(int d1, int d2, State& state, vector<Location> NextsAntsLocation) {
-        if (d1 > 0) {
+    int decisionMaking(int d1, int d2, State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+        if (d1 >= 0 && d2 <= 0) {
             // L'objectif se trouve vers le nord par rapport à ma 
-            if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 0))){
-                // Si la colone n'est pas dans les colones a éviter Et que la fourmie n'est PAS DESCENDU au tour d'avant alors la fourmit va vers le NORD
-                bannedUpCol.clear();
-                lastMove = 0;
-                return 0;
-            }
-            else if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 3))) {
-                bannedLeftRow.clear();
-                lastMove = 3;
-                return 3;
-            }
-            else if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 2))) {
-                bannedDownCol.clear();
-                lastMove = 2;
-                return 2;
-            }
-            else if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 1))) {
-                bannedRightRow.clear();
-                lastMove = 1;
-                return 1;
-            }
-            else if (!checkInList(NextsAntsLocation, state.getLocation(AntLocation, 0))){
-                lastMove = 0;
-                return 0;
-            }
-            else {
-                return 4;
-            }
+            return moveNorthEast(state, NextsAntsLocation, currentAntsLocation);
         }
-
-        else if (d2 > 0) {
-            if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 3))) {
-                bannedLeftRow.clear();
-                lastMove = 3;
-                return 3;
-            }
-            else if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 2))) {
-                bannedDownCol.clear();
-                lastMove = 2;
-                return 2;
-            }
-            else if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 1))) {
-                bannedRightRow.clear();
-                lastMove = 1;
-                return 1;
-            }
-            else if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 0))) {
-                bannedUpCol.clear();
-                lastMove = 0;
-                return 0;
-            }
-            else if (!checkInList(NextsAntsLocation, state.getLocation(AntLocation, 3))){
-                lastMove = 3;
-                return 3;
-            }
-            else {
-                return 4;
-            }
+        if (d1 <= 0 && d2 <= 0) {
+            return moveSouthEast(state, NextsAntsLocation, currentAntsLocation);
         }
-
-        else if (d1 < 0) {
-            if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 2))) {
-                bannedDownCol.clear();
-                lastMove = 2;
-                return 2;
-            }
-            else if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 1))) {
-                bannedRightRow.clear();
-                lastMove = 1;
-                return 1;
-            }
-            else if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 0))) {
-                bannedUpCol.clear();
-                lastMove = 0;
-                return 0;
-            }
-            else if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 3))) {
-                bannedLeftRow.clear();
-                lastMove = 3;
-                return 3;
-            }
-            else if (!checkInList(NextsAntsLocation, state.getLocation(AntLocation, 2))){
-                lastMove = 2;
-                return 2;
-            }
-            else {
-                return 4;
-            }
+        if (d1 <= 0 && d2 >= 0) {
+            return moveSouthWest(state, NextsAntsLocation, currentAntsLocation);
         }
-
-        else if (d2 < 0) {
-            if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 1))) {
-                bannedRightRow.clear();
-                lastMove = 1;
-                return 1;
-            }
-            else if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 0))) {
-                bannedUpCol.clear();
-                lastMove = 0;
-                return 0;
-            }
-            else if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 3))) {
-                bannedLeftRow.clear();
-                lastMove = 3;
-                return 3;
-            }
-            else if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, state.getLocation(AntLocation, 2))) {
-                bannedDownCol.clear();
-                lastMove = 2;
-                return 2;
-            }
-            else if (!checkInList(NextsAntsLocation, state.getLocation(AntLocation, 1))) {
-                lastMove = 1;
-                return 1;
-            }
-            else {
-                return 4;
-            }
+        if (d1 >= 0 && d2 >= 0) {
+            return moveNorthWest(state, NextsAntsLocation, currentAntsLocation);
         }
     };
 
-    Location refreshPosition(int nextDirection, State& state) {
+    int moveNorthEast(State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+        if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
+            bannedUpCol.clear();
+            lastMove = 0;
+            return 0;
+        }
+        else if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
+            bannedRightRow.clear();
+            lastMove = 1;
+            return 1;
+        }
+        else if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
+            bannedDownCol.clear();
+            lastMove = 2;
+            return 2;
+        }
+        else if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
+            bannedLeftRow.clear();
+            lastMove = 3;
+            return 3;
+        }
+        else if (!checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
+            lastMove = 0;
+            return 0;
+        }
+        else {
+            return 4;
+        }
+    }
+
+    int moveNorthWest(State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+        if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
+            bannedLeftRow.clear();
+            lastMove = 3;
+            return 3;
+        }
+        else if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
+            bannedUpCol.clear();
+            lastMove = 0;
+            return 0;
+        }
+        else if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
+            bannedRightRow.clear();
+            lastMove = 1;
+            return 1;
+        }
+        else if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
+            bannedDownCol.clear();
+            lastMove = 2;
+            return 2;
+        }
+        else if (!checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
+            lastMove = 3;
+            return 3;
+        }
+        else {
+            return 4;
+        }
+    }
+
+    int moveSouthEast(State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+        if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
+            bannedRightRow.clear();
+            lastMove = 1;
+            return 1;
+        }
+        else if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
+            bannedDownCol.clear();
+            lastMove = 2;
+            return 2;
+        }
+        else if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
+            bannedLeftRow.clear();
+            lastMove = 3;
+            return 3;
+        }
+        else if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
+            bannedUpCol.clear();
+            lastMove = 0;
+            return 0;
+        }
+        else if (!checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
+            lastMove = 1;
+            return 1;
+        }
+        else {
+            return 4;
+        }
+    }
+
+    int moveSouthWest(State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+        if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
+            bannedDownCol.clear();
+            lastMove = 2;
+            return 2;
+        }
+        else if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
+            bannedLeftRow.clear();
+            lastMove = 3;
+            return 3;
+        }
+        else if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
+            bannedUpCol.clear();
+            lastMove = 0;
+            return 0;
+        }
+        else if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
+            bannedRightRow.clear();
+            lastMove = 1;
+            return 1;
+        }
+        else if (!checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
+            lastMove = 2;
+            return 2;
+        }
+        else {
+            return 4;
+        }
+    }
+
+    void refreshPosition(int nextDirection, State& state) {
         AntLocation = state.getLocation(AntLocation, nextDirection);
-        return AntLocation;
     }
 };

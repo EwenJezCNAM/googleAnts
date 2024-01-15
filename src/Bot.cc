@@ -44,6 +44,7 @@ void Bot::makeMoves()
             KnownAnts.insert(KnownAnts.begin(), AntLogic(state.myAnts[i], getClosestItem(state.myAnts[i], state.food), false));
         }
     }
+
     for (int i = 0; i < KnownAnts.size(); i++)
     {
         boolean dead = true;
@@ -56,15 +57,16 @@ void Bot::makeMoves()
             KnownAnts.erase(KnownAnts.begin() + i);
         }
     }
+
+    notMovedAnts = KnownAnts;
+
     for (int i = 0; i < KnownAnts.size(); i++) {
         Location closestFood = getClosestItem(KnownAnts[i].AntLocation, state.food);
-        int nextDirection = KnownAnts[i].GetNextMove(closestFood, state, NextsAntsLocation);
-        if (nextDirection == 4) {
-            NextsAntsLocation.insert(NextsAntsLocation.begin(),KnownAnts[i].AntLocation);
-        }
-        else {
+        int nextDirection = KnownAnts[i].GetNextMove(closestFood, state, NextsAntsLocation, notMovedAnts);
+        if (nextDirection != 4) {
             state.makeMove(KnownAnts[i].AntLocation, nextDirection);
             KnownAnts[i].refreshPosition(nextDirection, state);
+            notMovedAnts.erase(notMovedAnts.begin());
             NextsAntsLocation.insert(NextsAntsLocation.begin(), KnownAnts[i].AntLocation);
         }
     }

@@ -15,6 +15,8 @@ struct Bot
     
     vector<AntLogic> KnownAnts;
     vector<Location> NextsAntsLocation;
+    vector<AntLogic> notMovedAnts;
+
 
     Bot();
 
