@@ -1,4 +1,6 @@
 /*
+authors : Ewen Jezequel, Pierre Vandel
+ 
 /!\ THIS CLASS IS NOT USED FOR THE BOT /!\
 
 Class Astar which is used for the A* algorithm

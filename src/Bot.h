@@ -4,6 +4,10 @@
 #include "State.h"
 #include "Location.h"
 #include "AntLogic.h"
+/*
+authors : Ewen Jezequel, Pierre Vandel
+*/
+
 #include <vector>
 
 /*

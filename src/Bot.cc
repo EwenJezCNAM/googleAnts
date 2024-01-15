@@ -1,3 +1,7 @@
+/*
+authors : Ewen Jezequel, Pierre Vandel
+*/
+
 #include "Bot.h"
 #include <map>
 #include <iostream>

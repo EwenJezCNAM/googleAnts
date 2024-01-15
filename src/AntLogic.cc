@@ -1,3 +1,7 @@
+/*
+authors : Ewen Jezequel, Pierre Vandel
+*/
+
 #include "AntLogic.h"
 #include "State.h"
 #include "Location.h"

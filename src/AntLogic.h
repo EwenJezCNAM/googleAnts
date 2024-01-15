@@ -1,3 +1,7 @@
+/*
+authors : Ewen Jezequel, Pierre Vandel
+*/
+
 #ifndef ANTLOGIC_H_
 #define ANTLOGIC_H_
 
