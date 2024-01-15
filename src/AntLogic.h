@@ -30,11 +30,11 @@ public:
 
     int GetNextMove(Location newObjectivLoc, State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
 
-        checkAndAddPositionToBanList(state);
         if (Objectif != newObjectivLoc) {
             clearAllList();
             Objectif = newObjectivLoc;
         }
+        checkAndAddPositionToBanList(state);
         int d1 = AntLocation.row - Objectif.row;
         int d2 = AntLocation.col - Objectif.col;
         if (d1 > 80) {
@@ -131,6 +131,7 @@ public:
     int moveNorthEast(State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
         if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
             bannedUpCol.clear();
+            state.bug << "the ant choosed to go up early" << endl;
             lastMove = 0;
             return 0;
         }
@@ -150,8 +151,8 @@ public:
             return 3;
         }
         else if (!checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
-            lastMove = 0;
-            return 0;
+            lastMove = 2;
+            return 2;
         }
         else {
             return 4;

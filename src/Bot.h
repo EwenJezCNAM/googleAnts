@@ -13,6 +13,7 @@ struct Bot
 {
     State state;
     
+
     vector<AntLogic> KnownAnts;
     vector<Location> NextsAntsLocation;
     vector<AntLogic> notMovedAnts;
