@@ -1,13 +1,13 @@
+/*
+authors : Ewen Jezequel, Pierre Vandel
+*/
+
 #ifndef BOT_H_
 #define BOT_H_
 
 #include "State.h"
 #include "Location.h"
 #include "AntLogic.h"
-/*
-authors : Ewen Jezequel, Pierre Vandel
-*/
-
 #include <vector>
 
 /*
