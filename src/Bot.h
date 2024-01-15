@@ -11,12 +11,11 @@
 */
 struct Bot
 {
-    State state;
-    
+    State m_state;
 
-    vector<AntLogic> KnownAnts;
-    vector<Location> NextsAntsLocation;
-    vector<AntLogic> notMovedAnts;
+    vector<AntLogic> m_knownAnts;
+    vector<Location> m_nextsAntsLocation;
+    vector<AntLogic> m_notMovedAnts;
 
 
     Bot();

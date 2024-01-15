@@ -9,37 +9,37 @@ using std::vector;
 
 struct AntLogic
 {
-    Location AntLocation; // Storing the Antlocation so I know wich one is it
+    Location m_antLocation; // Storing the antlocation so I know wich one is it
 private:
-    Location Objectif; // Storing the objective of the ant so it can remember and keep going in the same direction
-    int lastMove; // Remembering the last move done so the ant don't get stuck in a loop
+    Location m_objectif; // Storing the objective of the ant so it can remember and keep going in the same direction
+    int m_lastMove; // Remembering the last move done so the ant don't get stuck in a loop
     // The four list are used so an ant don't try to go in the same direction continuously
-    // For exemple the ant try a dead end, it'll go bakc on it's step and remember that this column
+    // For exemple the ant try a dead end, it'll go back on it's step and remember that this column
     // Don't help it in it's way to the food. It will then try an other way around
-    vector<int> bannedLeftRow;
-    vector<int> bannedRightRow;
-    vector<int> bannedUpCol;
-    vector<int> bannedDownCol;
+    vector<int> m_bannedLeftRow;
+    vector<int> m_bannedRightRow;
+    vector<int> m_bannedUpCol;
+    vector<int> m_bannedDownCol;
 
 
 public:
-    AntLogic(Location _Antloc, Location _objectivLoc) 
+    AntLogic(Location _antloc, Location _objectivLoc) 
     {
         // Creation of the ant and attribution its objective
-        AntLocation = _Antloc;
-        Objectif = _objectivLoc;
+        m_antLocation = _antloc;
+        m_objectif = _objectivLoc;
     };
 
-    int GetNextMove(Location newObjectivLoc, State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+    int getNextMove(Location newObjectivLoc, State& state, vector<Location> nextsAntsLocation, vector<AntLogic> currentAntsLocation) {
         // Fuction returning the next move of a selected ant as an int
-        if (Objectif != newObjectivLoc) {
+        if (m_objectif != newObjectivLoc) {
             // If the objective change, the ant will forget the dead end of the last objective
             clearAllList();
-            Objectif = newObjectivLoc;
+            m_objectif = newObjectivLoc;
         }
         checkAndAddPositionToBanList(state);
-        int rowDirection = AntLocation.row - Objectif.row;
-        int colDirection = AntLocation.col - Objectif.col;
+        int rowDirection = m_antLocation.row - m_objectif.row;
+        int colDirection = m_antLocation.col - m_objectif.col;
         // Here i change the result of rowDirection and colDirection depending on their result so
         // my ant don't go across the map to grab food that are on the other side of it but on the edge of it
         if (rowDirection > 80) {
@@ -54,14 +54,14 @@ public:
         if (colDirection < -50) {
             colDirection = 1;
         }
-        int decision = decisionMaking(rowDirection, colDirection, state, NextsAntsLocation, currentAntsLocation);
+        int decision = decisionMaking(rowDirection, colDirection, state, nextsAntsLocation, currentAntsLocation);
         return decision;
     };
 
-    boolean checkIfBanned(vector<int> testedList, int testedInt) {
+    bool checkIfBanned(vector<int> testedList, int testedInt) {
         // This function check if an int is or not in a list of int
 
-        boolean isBanned = false;
+        bool isBanned = false;
         for (int i = 0; i < testedList.size(); i++) {
             if (testedInt == testedList[i]) {
                 isBanned = true;
@@ -71,20 +71,20 @@ public:
         return isBanned;
     };
 
-    boolean checkInList(vector<Location> NextMoveList, vector<AntLogic> currentAntsLocation, Location testedInt) {
+    bool checkInList(vector<Location> nextMoveList, vector<AntLogic> currentAntsLocation, Location testedInt) {
         // This function check if a location is or not in on of the 2 list so the ants 
         // don't kill them self by going on the same location
         
-        boolean isInList = false;
-        for (int i = 0; i < NextMoveList.size(); i++) {
-            if (testedInt == NextMoveList[i]) {
+        bool isInList = false;
+        for (int i = 0; i < nextMoveList.size(); i++) {
+            if (testedInt == nextMoveList[i]) {
                 isInList = true;
                 break;
             }
         }
         if (!isInList) {
             for (int i = 0; i < currentAntsLocation.size(); i++) {
-                if (testedInt == currentAntsLocation[i].AntLocation) {
+                if (testedInt == currentAntsLocation[i].m_antLocation) {
                     isInList = true;
                     break;
                 }
@@ -94,81 +94,81 @@ public:
     };
 
 
-    void checkAndAddPositionToBanList(State& state) {
+    void checkAndAddPositionToBanList(State& r_state) {
         // Function Checking if the column or row is water and is not already in this banned list and if so add it to the ban list
-        Location northneighbor = state.getLocation(AntLocation, 0);
-        Location southneighbor = state.getLocation(AntLocation, 2);
-        Location westneighbor = state.getLocation(AntLocation, 3);
-        Location easthneighbor = state.getLocation(AntLocation, 1);
+        Location northneighbor = r_state.getLocation(m_antLocation, 0);
+        Location southneighbor = r_state.getLocation(m_antLocation, 2);
+        Location westneighbor = r_state.getLocation(m_antLocation, 3);
+        Location easthneighbor = r_state.getLocation(m_antLocation, 1);
 
-        if (state.grid[northneighbor.row][northneighbor.col].isWater && !checkIfBanned(bannedUpCol, AntLocation.col)) {
-            bannedUpCol.insert(bannedUpCol.begin(), AntLocation.col);
+        if (r_state.grid[northneighbor.row][northneighbor.col].isWater && !checkIfBanned(m_bannedUpCol, m_antLocation.col)) {
+            m_bannedUpCol.insert(m_bannedUpCol.begin(), m_antLocation.col);
         }
-        if (state.grid[southneighbor.row][southneighbor.col].isWater && !checkIfBanned(bannedDownCol, AntLocation.col)) {
-            bannedDownCol.insert(bannedDownCol.begin(), AntLocation.col);
+        if (r_state.grid[southneighbor.row][southneighbor.col].isWater && !checkIfBanned(m_bannedDownCol, m_antLocation.col)) {
+            m_bannedDownCol.insert(m_bannedDownCol.begin(), m_antLocation.col);
         }
-        if (state.grid[westneighbor.row][westneighbor.col].isWater && !checkIfBanned(bannedLeftRow, AntLocation.row)) {
-            bannedLeftRow.insert(bannedLeftRow.begin(), AntLocation.row);
+        if (r_state.grid[westneighbor.row][westneighbor.col].isWater && !checkIfBanned(m_bannedLeftRow, m_antLocation.row)) {
+            m_bannedLeftRow.insert(m_bannedLeftRow.begin(), m_antLocation.row);
         }
-        if (state.grid[easthneighbor.row][easthneighbor.col].isWater && !checkIfBanned(bannedRightRow, AntLocation.row)) {
-            bannedRightRow.insert(bannedRightRow.begin(), AntLocation.row);
+        if (r_state.grid[easthneighbor.row][easthneighbor.col].isWater && !checkIfBanned(m_bannedRightRow, m_antLocation.row)) {
+            m_bannedRightRow.insert(m_bannedRightRow.begin(), m_antLocation.row);
         }
     };
 
     void clearAllList() {
         // Function clearing all the "memory" of the ant so it don't get stuck if a new objectif is determined
-        bannedUpCol.clear();
-        bannedLeftRow.clear();
-        bannedDownCol.clear();
-        bannedRightRow.clear();
+        m_bannedUpCol.clear();
+        m_bannedLeftRow.clear();
+        m_bannedDownCol.clear();
+        m_bannedRightRow.clear();
     };
 
-    int decisionMaking(int rowDirection, int colDirection, State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
-        // Depending of the result of d1 and d2, I return a specific function so the nat can go to the food the fastest way possible
+    int decisionMaking(int rowDirection, int colDirection, State& r_state, vector<Location> nextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+        // Depending of the result of d1 and d2, I return a specific function so the ant can go to the food the fastest way possible
         if (rowDirection >= 0 && colDirection <= 0) {
             // The objective is in the north-east direction depending on the ant
-            return moveNorthEast(state, NextsAntsLocation, currentAntsLocation);
+            return moveNorthEast(r_state, nextsAntsLocation, currentAntsLocation);
         }
         if (rowDirection <= 0 && colDirection <= 0) {
             // The objective is in the south-east direction depending on the ant
-            return moveSouthEast(state, NextsAntsLocation, currentAntsLocation);
+            return moveSouthEast(r_state, nextsAntsLocation, currentAntsLocation);
         }
         if (rowDirection <= 0 && colDirection >= 0) {
             // The objective is in the south-west direction depending on the ant
-            return moveSouthWest(state, NextsAntsLocation, currentAntsLocation);
+            return moveSouthWest(r_state, nextsAntsLocation, currentAntsLocation);
         }
         if (rowDirection >= 0 && colDirection >= 0) {
             // The objective is in the north-west direction depending on the ant
-            return moveNorthWest(state, NextsAntsLocation, currentAntsLocation);
+            return moveNorthWest(r_state, nextsAntsLocation, currentAntsLocation);
         }
     };
 
-    int moveNorthEast(State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+    int moveNorthEast(State& r_state, vector<Location> nextsAntsLocation, vector<AntLogic> currentAntsLocation) {
         // In case the food is in the north-east of the ant, it will try to go up first, then, if it can't, it'll try to go right, then down and then left
         // If the ant is stuck and no one is behind it, it will go back on his step to escape from a dead end
         // And if it can't move at all it will return 4 making it stay put
-        if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
-            bannedUpCol.clear();
-            lastMove = 0;
+        if (!checkIfBanned(m_bannedUpCol, m_antLocation.col) && m_lastMove != 2 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 0))) {
+            m_bannedUpCol.clear();
+            m_lastMove = 0;
             return 0;
         }
-        else if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
-            bannedRightRow.clear();
-            lastMove = 1;
+        else if (!checkIfBanned(m_bannedRightRow, m_antLocation.row) && m_lastMove != 3 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 1))) {
+            m_bannedRightRow.clear();
+            m_lastMove = 1;
             return 1;
         }
-        else if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
-            bannedDownCol.clear();
-            lastMove = 2;
+        else if (!checkIfBanned(m_bannedDownCol, m_antLocation.col) && m_lastMove != 0 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 2))) {
+            m_bannedDownCol.clear();
+            m_lastMove = 2;
             return 2;
         }
-        else if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
-            bannedLeftRow.clear();
-            lastMove = 3;
+        else if (!checkIfBanned(m_bannedLeftRow, m_antLocation.row) && m_lastMove != 1 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 3))) {
+            m_bannedLeftRow.clear();
+            m_lastMove = 3;
             return 3;
         }
-        else if (!checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
-            lastMove = 2;
+        else if (!checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 0))) {
+            m_lastMove = 2;
             return 2;
         }
         else {
@@ -176,32 +176,32 @@ public:
         }
     }
 
-    int moveNorthWest(State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+    int moveNorthWest(State& r_state, vector<Location> nextsAntsLocation, vector<AntLogic> currentAntsLocation) {
         // In case the food is in the north-west of the ant, it will try to go left first, then, if it can't, it'll try up, then right and then down
         // If the ant is stuck and no one is behind it, it will go back on his step to escape from a dead end
         // And if it can't move at all it will return 4 making it stay put
-        if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
-            bannedLeftRow.clear();
-            lastMove = 3;
+        if (!checkIfBanned(m_bannedLeftRow, m_antLocation.row) && m_lastMove != 1 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 3))) {
+            m_bannedLeftRow.clear();
+            m_lastMove = 3;
             return 3;
         }
-        else if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
-            bannedUpCol.clear();
-            lastMove = 0;
+        else if (!checkIfBanned(m_bannedUpCol, m_antLocation.col) && m_lastMove != 2 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 0))) {
+            m_bannedUpCol.clear();
+            m_lastMove = 0;
             return 0;
         }
-        else if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
-            bannedRightRow.clear();
-            lastMove = 1;
+        else if (!checkIfBanned(m_bannedRightRow, m_antLocation.row) && m_lastMove != 3 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 1))) {
+            m_bannedRightRow.clear();
+            m_lastMove = 1;
             return 1;
         }
-        else if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
-            bannedDownCol.clear();
-            lastMove = 2;
+        else if (!checkIfBanned(m_bannedDownCol, m_antLocation.col) && m_lastMove != 0 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 2))) {
+            m_bannedDownCol.clear();
+            m_lastMove = 2;
             return 2;
         }
-        else if (!checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
-            lastMove = 3;
+        else if (!checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 3))) {
+            m_lastMove = 3;
             return 3;
         }
         else {
@@ -209,32 +209,32 @@ public:
         }
     }
 
-    int moveSouthEast(State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+    int moveSouthEast(State& state, vector<Location> nextsAntsLocation, vector<AntLogic> currentAntsLocation) {
         // In case the food is in the south-east of the ant, it will try to go right first, then, if it can't, it'll go down, then left and then up
         // If the ant is stuck and no one is behind it, it will go back on his step to escape from a dead end
         // And if it can't move at all it will return 4 making it stay put
-        if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
-            bannedRightRow.clear();
-            lastMove = 1;
+        if (!checkIfBanned(m_bannedRightRow, m_antLocation.row) && m_lastMove != 3 && !checkInList(nextsAntsLocation, currentAntsLocation, state.getLocation(m_antLocation, 1))) {
+            m_bannedRightRow.clear();
+            m_lastMove = 1;
             return 1;
         }
-        else if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
-            bannedDownCol.clear();
-            lastMove = 2;
+        else if (!checkIfBanned(m_bannedDownCol, m_antLocation.col) && m_lastMove != 0 && !checkInList(nextsAntsLocation, currentAntsLocation, state.getLocation(m_antLocation, 2))) {
+            m_bannedDownCol.clear();
+            m_lastMove = 2;
             return 2;
         }
-        else if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
-            bannedLeftRow.clear();
-            lastMove = 3;
+        else if (!checkIfBanned(m_bannedLeftRow, m_antLocation.row) && m_lastMove != 1 && !checkInList(nextsAntsLocation, currentAntsLocation, state.getLocation(m_antLocation, 3))) {
+            m_bannedLeftRow.clear();
+            m_lastMove = 3;
             return 3;
         }
-        else if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
-            bannedUpCol.clear();
-            lastMove = 0;
+        else if (!checkIfBanned(m_bannedUpCol, m_antLocation.col) && m_lastMove != 2 && !checkInList(nextsAntsLocation, currentAntsLocation, state.getLocation(m_antLocation, 0))) {
+            m_bannedUpCol.clear();
+            m_lastMove = 0;
             return 0;
         }
-        else if (!checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
-            lastMove = 1;
+        else if (!checkInList(nextsAntsLocation, currentAntsLocation, state.getLocation(m_antLocation, 1))) {
+            m_lastMove = 1;
             return 1;
         }
         else {
@@ -242,32 +242,32 @@ public:
         }
     }
 
-    int moveSouthWest(State& state, vector<Location> NextsAntsLocation, vector<AntLogic> currentAntsLocation) {
+    int moveSouthWest(State& r_state, vector<Location> nextsAntsLocation, vector<AntLogic> currentAntsLocation) {
         // In case the food is in the south-west of the ant, it will try to go down first, then, if it can't, it'll try left, then up and then right
         // If the ant is stuck and no one is behind it, it will go back on his step to escape from a dead end
         // And if it can't move at all it will return 4 making it stay put
-        if (!checkIfBanned(bannedDownCol, AntLocation.col) && lastMove != 0 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
-            bannedDownCol.clear();
-            lastMove = 2;
+        if (!checkIfBanned(m_bannedDownCol, m_antLocation.col) && m_lastMove != 0 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 2))) {
+            m_bannedDownCol.clear();
+            m_lastMove = 2;
             return 2;
         }
-        else if (!checkIfBanned(bannedLeftRow, AntLocation.row) && lastMove != 1 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 3))) {
-            bannedLeftRow.clear();
-            lastMove = 3;
+        else if (!checkIfBanned(m_bannedLeftRow, m_antLocation.row) && m_lastMove != 1 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 3))) {
+            m_bannedLeftRow.clear();
+            m_lastMove = 3;
             return 3;
         }
-        else if (!checkIfBanned(bannedUpCol, AntLocation.col) && lastMove != 2 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 0))) {
-            bannedUpCol.clear();
-            lastMove = 0;
+        else if (!checkIfBanned(m_bannedUpCol, m_antLocation.col) && m_lastMove != 2 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 0))) {
+            m_bannedUpCol.clear();
+            m_lastMove = 0;
             return 0;
         }
-        else if (!checkIfBanned(bannedRightRow, AntLocation.row) && lastMove != 3 && !checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 1))) {
-            bannedRightRow.clear();
-            lastMove = 1;
+        else if (!checkIfBanned(m_bannedRightRow, m_antLocation.row) && m_lastMove != 3 && !checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 1))) {
+            m_bannedRightRow.clear();
+            m_lastMove = 1;
             return 1;
         }
-        else if (!checkInList(NextsAntsLocation, currentAntsLocation, state.getLocation(AntLocation, 2))) {
-            lastMove = 2;
+        else if (!checkInList(nextsAntsLocation, currentAntsLocation, r_state.getLocation(m_antLocation, 2))) {
+            m_lastMove = 2;
             return 2;
         }
         else {
@@ -275,8 +275,8 @@ public:
         }
     }
 
-    void refreshPosition(int nextDirection, State& state) {
+    void refreshPosition(int nextDirection, State& r_state) {
         // I update the position of the ant depending on the move inserted
-        AntLocation = state.getLocation(AntLocation, nextDirection);
+        m_antLocation = r_state.getLocation(m_antLocation, nextDirection);
     }
 };

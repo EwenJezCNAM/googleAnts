@@ -14,14 +14,14 @@ Bot::Bot()
 void Bot::playGame()
 {
     //reads the game parameters and sets up
-    cin >> state;
-    state.setup();
+    cin >> m_state;
+    m_state.setup();
     endTurn();
 
     //continues making moves while the game is not over
-    while(cin >> state)
+    while(cin >> m_state)
     {
-        state.updateVisionInformation();
+        m_state.updateVisionInformation();
         makeMoves();
         endTurn();
     }
@@ -30,43 +30,43 @@ void Bot::playGame()
 //makes the bots moves for the turn
 void Bot::makeMoves()
 {
-    NextsAntsLocation.clear(); // Clearing all the previous future ants location because it is now their location
+    m_nextsAntsLocation.clear(); // Clearing all the previous future ants location because it is now their location
 
-    for (int i = 0; i < KnownAnts.size(); i++) // Clearing my list of all the dead ants
+    for (int i = 0; i < m_knownAnts.size(); i++) // Clearing my list of all the dead ants
     {
-        boolean dead = true;
-        for (int j = 0; j < state.myAnts.size(); j++) {
-            if (KnownAnts[i].AntLocation == state.myAnts[j]) {
+        bool dead = true;
+        for (int j = 0; j < m_state.myAnts.size(); j++) {
+            if (m_knownAnts[i].m_antLocation == m_state.myAnts[j]) {
                 dead = false;
             }
         }
         if (dead) {
-            KnownAnts.erase(KnownAnts.begin() + i);
+            m_knownAnts.erase(m_knownAnts.begin() + i);
         }
     }
 
-    for (int i = 0; i < state.myAnts.size(); i++) // Adding new ants to my list of known ant so i can make them move and give them an objective
+    for (int i = 0; i < m_state.myAnts.size(); i++) // Adding new ants to my list of known ant so i can make them move and give them an objective
     {
-        boolean inTheList = false;
-        for (int j = 0; j < KnownAnts.size(); j++) {
-            if (KnownAnts[j].AntLocation == state.myAnts[i]) {
+        bool inTheList = false;
+        for (int j = 0; j < m_knownAnts.size(); j++) {
+            if (m_knownAnts[j].m_antLocation == m_state.myAnts[i]) {
                 inTheList = true;
             }
         }
         if (!inTheList) {
-            KnownAnts.insert(KnownAnts.begin(), AntLogic(state.myAnts[i], getClosestItem(state.myAnts[i], state.food)));
+            m_knownAnts.insert(m_knownAnts.begin(), AntLogic(m_state.myAnts[i], getClosestItem(m_state.myAnts[i], m_state.food)));
         }
     }
 
-    notMovedAnts = KnownAnts; // Updating not moved ants so thay don't kill themselfs
+    m_notMovedAnts = m_knownAnts; // Updating not moved ants so thay don't kill themselfs
 
-    for (int i = 0; i < KnownAnts.size(); i++) { // Giving all the ants theire next move
-        Location closestFood = getClosestItem(KnownAnts[i].AntLocation, state.food); // Location the nearest food of the current ant
-        int nextDirection = KnownAnts[i].GetNextMove(closestFood, state, NextsAntsLocation, notMovedAnts); // get the next move of the current ant
+    for (int i = 0; i < m_knownAnts.size(); i++) { // Giving all the ants their next move
+        Location closestFood = getClosestItem(m_knownAnts[i].m_antLocation, m_state.food); // Location the nearest food of the current ant
+        int nextDirection = m_knownAnts[i].getNextMove(closestFood, m_state, m_nextsAntsLocation, m_notMovedAnts); // get the next move of the current ant
         if (nextDirection != 4) { // if not 4 applying the next move and refresh it's position in my list
-            state.makeMove(KnownAnts[i].AntLocation, nextDirection);
-            KnownAnts[i].refreshPosition(nextDirection, state);
-            NextsAntsLocation.insert(NextsAntsLocation.begin(), KnownAnts[i].AntLocation);
+            m_state.makeMove(m_knownAnts[i].m_antLocation, nextDirection);
+            m_knownAnts[i].refreshPosition(nextDirection, m_state);
+            m_nextsAntsLocation.insert(m_nextsAntsLocation.begin(), m_knownAnts[i].m_antLocation);
         }
     }
 };
@@ -80,7 +80,7 @@ Location Bot::getClosestItem(Location ant, vector<Location> items)
 
     for (int j = 0; j < items.size(); j++)
     {
-        float distance = state.distance(ant, items[j]);
+        float distance = m_state.distance(ant, items[j]);
         if (distance < minDistance)
         {
             minDistance = distance;
@@ -92,9 +92,9 @@ Location Bot::getClosestItem(Location ant, vector<Location> items)
     return foodInfoPosition;
 }
 
-boolean isInList(vector<AntLogic> list, Location Ant) {
+bool isInList(vector<AntLogic> list, Location Ant) {
     for (int i = 0; i < list.size(); i++) {
-        if (list[i].AntLocation == Ant)
+        if (list[i].m_antLocation == Ant)
             return true;
     }
     return false;
@@ -117,9 +117,9 @@ bool Bot::checkInVector(const std::vector<T> vec, const T elementToFind) {
 //finishes the turn
 void Bot::endTurn()
 {
-    if(state.turn > 0)
-        state.reset();
-    state.turn++;
+    if(m_state.turn > 0)
+        m_state.reset();
+    m_state.turn++;
 
     cout << "go" << endl;
 };
